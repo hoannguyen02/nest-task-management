@@ -3,11 +3,11 @@ import { Controller, Get, Post, Body, Param, Delete, Patch, Query, UsePipes, Val
 import { TasksService } from './tasks.service';
 import { SearchTaskDto } from './dto/search-task.dto';
 import { TaskStatusValidationPipe } from './pipes/task-status-validation.pipe';
+import { GetUser } from 'src/auth/get-user.decorator';
 import { Task } from './tasks.entity';
 import { TaskStatus } from './tasks.enum';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from '../auth/user.entity';
-import { GetUser } from 'src/auth/get-user.decorator';
 
 @Controller('tasks')
 @UseGuards(AuthGuard())

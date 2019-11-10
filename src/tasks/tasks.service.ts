@@ -1,5 +1,5 @@
 import { CreateTaskDto } from './dto/create-task.dto';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger, InternalServerErrorException } from '@nestjs/common';
 import { SearchTaskDto } from './dto/search-task.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TaskRepository } from './tasks.repository';
@@ -9,11 +9,13 @@ import { User } from '../auth/user.entity';
 
 @Injectable()
 export class TasksService {
+
     constructor(
         @InjectRepository(TaskRepository) private taskRepository: TaskRepository,
-    ) {
-
-    }
+        ) {
+            
+        }
+        private logger = new Logger('TasksService');
 
     async getTasks(searchTask: SearchTaskDto, user: User): Promise<Task[]> {
         return await this.taskRepository.getTasks(searchTask, user);
@@ -37,8 +39,13 @@ export class TasksService {
     async updateStatus(id: string, status: TaskStatus, user: User): Promise<Task> {
         const task = await this.getTaskById(id, user);
         task.status = status;
-        await task.save();
-        return task;
+        try {
+            await task.save();
+            return task;
+        } catch (error) {
+            this.logger.error(`Failed to update status id: ${id}, status: ${status}, user: ${JSON.stringify(user)}`);
+            throw new InternalServerErrorException();
+        }
     }
 
     async createTask(createTaskDto: CreateTaskDto, user: User): Promise<Task> {
